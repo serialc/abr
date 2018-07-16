@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- icon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/abr.css">
+    <!-- Fonts and misc -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script defer src="js/solid.js"></script>
+    <script defer src="js/fontawesome.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <title>Advanced Batch Routing</title>
+  </head>
+
+  <body>
+    <nav class="navbar sticky-top navbar-expand-sm navbar-dark bg-dark">
+        <div class="container">
+          <a class="navbar-brand" href="#">ABR</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a id="submissionlink" class="nav-link" href="#">Submission</a>
+              </li>
+              <li class="nav-item">
+                <a id="statuslink" class="nav-link" href="#">Status</a>
+              </li>
+              <li class="nav-item">
+                <a id="resultslink" class="nav-link" href="#">Results</a>
+              </li>
+              <li class="nav-item">
+                <a id="analyticslink" class="nav-link" href="#">Analytics</a>
+              </li>
+              <li class="nav-item">
+                <a id="documentationlink" class="nav-link" href="#">Documentation</a>
+              </li>
+            </ul>
+          </div>
+      </div>
+    </nav>
+    <div id="submission_page" class="container">
+        <div class="row">
+            <div class="col-lg">
+                <h1>Submit new routing requests</h1>
+                <p>Uploading new requests has two validation steps:</p>
+                <ol>
+                    <li>Automated - Following upload, the validation of headings and each requests' fields.</li>
+                    <li>Manual - Evaluation of the number and spatial distribution of requests.</li>
+                </ol>
+                <p>If the automated checks pass and the distribution looks appropriate then you may submit the requests to the queue.</p>
+                <p>Note that the origin/destination mapping will only occur if the number of requests isn't too great. This is easily variable in the configuration file if desired.</p>
+
+                <h2>Upload</h2>
+                <div id="requests_sub_p1">
+                    <p> Following the formatting specified in the documentation, upload a text file containing requests: </p>
+                    <!-- <form id="upload_requests_form" enctype="multipart/form-data"> -->
+                    <form class="boxit" id="upload_requests_form">
+                        <div class="row">
+                            <div class="col-lg">
+                                <p>
+                                    <input type="file" name="requests_text_file" id="requests_text_file">
+                                </p>
+                                <div id="upload_file_info">&nbsp; </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg">
+                                <input id="submit_file" type="button" value="Submit file" name="submit">
+                            </div>
+                        </div>
+                    </form>
+                    <div id="upload_errors" class="alert alert-danger hidden"></div>
+                    <div id="upload_status" class="alert alert-success hidden"></div>
+                    <div id="upload_messages" class="alert alert-primary hidden"></div>
+                </div> <!-- End of part 1 -->
+                <div id="requests_review_p2" class="hidden"> 
+                    <h2>Evaluation of submission</h2>
+                        <p>
+                            Please double check the requests you are about to add to the queue.
+                        </p>
+
+                        <h3>Summary of requests</h3>
+                        <div id="requests_summary"> </div>
+
+                        <div id="map_section">
+                            <h3>Map of requests</h3>
+                            <div id="requests_map"> </div>
+                            <p>Note that if you are requesting reversed requests (OD and DO) only the first set are displayed above.</p>
+                        </div>
+
+                        <h3>Submit requests</h3>
+                        <p>If the requests appear correct you may add them to the queue by submitting them below</p>
+                        <p><button id="submit_requests" type="button" class="btn btn-success" disabled>Submit requests to queue</button></p>
+                        <div id="submit_errors" class="alert alert-danger hidden"></div>
+                        <div id="submit_messages" class="alert alert-primary hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="status_page" class="container hidden">
+        <div class="row">
+            <div class="col-lg">
+                <h1>
+                    Processing status
+                    <button id="abr_turn_on_button" class="float-right btn btn-success hidden">Start ABR</button>
+                    <button id="abr_turn_off_button" class="float-right btn btn-danger hidden">Stop ABR</button>
+                </h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg">
+                <p id='abr_status_unknown' class="alert alert-warning">ABR status is unknown.</p>
+                <p id='abr_status_down' class="alert alert-danger hidden">ABR is offline.</p>
+                <p id='abr_status_up' class="alert alert-success hidden">ABR is running.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg">
+                <h2>Disk usage</h2>
+                <div id="abr_disk_usage_alert"class="alert"><span id="abr_disk_usage"></span></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg">
+                <h2>
+                    Requests queue summary
+                    <button id="refresh_queue_summary_button" class="float-right btn btn-info">Refresh</button>
+                </h2>
+                <div id="requests_queue_summary" class="boxit text-right">[Loading summary]</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg">
+                <h2> Server settings </h2>
+            </div>
+        </div>
+        <div id="server_settings_status" class="row no-gutters">
+            <div class="col-lg">[Loading...]</div>
+        </div>
+        <div class="row">
+            <div class="col-lg">
+                <h2>
+                    Log file
+                    <div class="float-right">
+                        <button id="abr_log_clear_button" class="btn btn-warning">Clear</button>
+                        <button id="abr_log_refresh_button" class="btn btn-info">Refresh</button>
+                    </div>
+                </h2>
+                <div id="abr_log_file_contents" class="boxit">[Loading log file]</div>
+            </div>
+        </div>
+    </div>
+    <div id="results_page" class="container hidden">
+        <div class="row">
+            <div class="col-lg">
+                <h1>
+                    Results
+                    <button id="refresh_results_table_button" class="btn btn-info float-right">Refresh</button>
+                </h1>
+                <p>Aside from monitoring progress you can also download the data for each case study.</p>
+                <p>Note that as data sets get larger, packaging them for download may take <em>a few minutes</em>. <strong>Please be patient</strong>.</p>
+                <div id="results_table" class="boxit"></div>
+            </div>
+        </div>
+    </div>
+    <div id="analytics_page" class="container hidden">
+        <div class="row">
+            <div class="col-lg">
+                <h1>
+                    Analytics
+                    <button id="refresh_analytics_button" class="btn btn-info float-right">Refresh</button>
+                </h1>
+
+                <h2>Requests history</h2>
+                <p>
+                    Number of requests completed per minute within the last period:
+                    <button class="btn btn-secondary" onclick="ABR.update_requests_analytics_graph(60)">1-hour</button>
+                    <button class="btn btn-secondary" onclick="ABR.update_requests_analytics_graph(1440)">1-day</button>
+                    <button class="btn btn-secondary" onclick="ABR.update_requests_analytics_graph(4320)">3-days</button>
+                    <button class="btn btn-secondary" onclick="ABR.update_requests_analytics_graph(10080)">1-week</button>
+                    <button class="btn btn-secondary" onclick="ABR.update_requests_analytics_graph(0)">all data</button>
+                </p>
+                <div id="requests_analytics_figure" class=""> </div>
+
+                <h2>Drive space usage history</h2>
+                <p>
+                    Use of disk space over the period:
+                    <button class="btn btn-secondary" onclick="ABR.update_disk_usage_analytics_graph(1440)">1-day</button>
+                    <button class="btn btn-secondary" onclick="ABR.update_disk_usage_analytics_graph(4320)">3-days</button>
+                    <button class="btn btn-secondary" onclick="ABR.update_disk_usage_analytics_graph(10080)">1-week</button>
+                    <button class="btn btn-secondary" onclick="ABR.update_disk_usage_analytics_graph(43200)">1-month</button>
+                    <button class="btn btn-secondary" onclick="ABR.update_disk_usage_analytics_graph(0)">all data</button>
+                </p>
+                <div id="disk_space_usage_analytics_figure" class=""> </div>
+            </div>
+        </div>
+    </div>
+    <div id="documentation_page" class="container hidden">
+        <div class="row">
+            <div class="col">
+                <h1>Documentation</h1>
+                <p>Advanced Batch Routing (ABR) is an evolution of <a href="http://geow.uni.lu/apps/fbr/">Friendly Batch Routing</a> that focuses on offering a more automated process through request queuing. While ABR will requires more specifications for requests, it runs on an external server allowing personal flexibility, reduces management time of submitting requests and potentially save money as a result where exceeding a daily free quota would have been necessary.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 col-md-2 routing"> </div>
+            <div class="col-lg-9 col-md-10">
+                <h2>Input file formatting</h2>
+                <p>Text files must have the following formatting:</p>
+                <ul class="docu">
+                    <li><strong>semicolons</strong> separate fields/values (see headings below).</li>
+                    <li><strong>headings</strong> must be <em>exactly</em> the following:<br>
+                    <strong>case_study;id;origin;destination;departure_datetime;mode;instructions;priority;apikey</strong></li>
+                    <p>Example file:<br>
+<pre>case_study;id;origin;destination;departure_datetime;mode;instructions;priority;apikey
+ca_kaml;1;50.672,-120.339;50.674,-120.327;;walking;;1;SECRET_API_KEY
+ca_kaml;2;50.676,-120.315;50.674,-120.327;1537833600;driving;HL;2;SECRET_API_KEY</pre>
+                    </p>
+                </ul>
+
+                <p>Field contents formatting:</p>
+                <ul class="docu">
+                    <li>
+                        <code>case_study</code> - field should contain text or numeric string combination. It’s helpful if the <a href='https://en.wikipedia.org/wiki/ISO_3166-1#Current_codes'>country code</a> and city name are in the <code>case_study</code> (e.g., be_namur, fr_paris).<br>
+                        <pre>[4-16 characters][lower case characters, digit and underscore only]</pre>
+                    </li>
+
+                    <li>
+                        <code>id</code> - should be unique for each request in your project (e.g., 1,2,3, 1.1,1.2,1.3).<br>
+                        <pre>[1-16 characters][lower case characters, digits, period and underscore only]</pre>
+                    </li>
+
+                    <li>
+                        <code>origin</code> and <code>destination</code> - comma separated values of lat,long (e.g., 49.543315,-123.212345)<br>
+                        <pre>[24 characters max][digits, period, comma and dash/negative sign]</pre>
+                    </li>
+
+                    <li>
+                        <code>departure_datetime</code> - epoch time (seconds since January 1st, 1970 00:00:00 UTC) is required if traffic congestion is desired. Otherwise it can be left blank.
+                        <pre>[integer]</pre>
+                        <p><strong>NOTE</strong>: You <em>must</em> convert your local time to the epoch time (also known as Unix time or POSIX time) or your requests will at the wrong time. The best way to do this is to first convert your local time to UTC time, then retrieve the epoch time.</p>
+                        <p>Tuesday September 25, 2018 02:00:00 (am) in Luembourg, is Tuesday the 25th of September 2018 at 00:00:00 UTC, which is 1537833600. See <a href="https://www.epochconverter.com/">EpochConverter</a> for more information.</p>
+                    </li>
+
+                    <li>
+                        <code>mode</code> - is required to be one of the following:<br>
+                        <pre>[driving, walking, bicycling or transit]</pre>
+                    </li>
+
+                    <li>
+                    <code>instructions</code> - determine how a request should be temporal or directionally replicated.
+                        <pre>[up to three characters][R, H, and/or L]</pre>
+                        <ul>
+                            <li><code>H</code> - <strong>hourly</strong> expands request to 24 hourly requests of OD directions - starting at the <code>departure_datetime</code>.</li>
+                            <li><code>R</code> - <strong>reversed</strong> will double requests by adding an addition reversed direction (destination to origin).</li>
+                            <li><code>L</code> - <strong>live</strong> request datetime. This will only run at date provided by departure_datetime to get live data on congestion. <strong>Live requests will try and run even if they exceed your quota. Use them carefully or better yet, separately from other requests.</strong></li>
+                        </ul>
+
+                        <strong>NOTE</strong> that:
+                        <ul>
+                            <li><code>RH</code> - one such request with these instructions will expand to 48 requests.</li>
+                            <li><code>LRH</code> - can all be used together.</li>
+                        </ul>
+                    </li>
+
+                    <li>
+                    <code>priority</code> - will be used to sort order of processing requests. Higher priority requests are given priority. Various factors influence processing order such as <code>instructions</code> if <code>live</code> as well as <code>apikey</code> quotas. Allocating <code>live</code> or higher priority requests (anything above 1) should be done thoughfully.
+                        <pre>[integer from 1-9]</pre>
+                    <p>
+                        <strong>NOTE</strong>: <code>live</code> requests may exceed your free quota regardless of what priority they are given.<br>
+                        <strong>NOTE</strong>: Values greater than 5 allow exceeding free quotas. Doing this will likely cost money.
+                    </p>
+                    </li>
+
+                    <li>
+                        <code>apikey</code> - is the key used to complete the request. If multiple keys are used then more than 2,500 requests per day are possible by ABR. 
+                        <pre>[a valid key]</pre>
+                    </li>
+                </ul>
+
+                <h2>Results</h2>
+                <p>Downloading results provides all the JSON request responses as well as a dump of the database providing the datetime the request was made and all the parameters used.</p>
+
+                <h2>Parsing results</h2>
+                <p>The best resource for understanding the results is the <a href="https://developers.google.com/maps/documentation/directions/intro#Routes">Routes section</a> of the Google Maps Directions API.</p>
+                <h2>Limitations</h2>
+                <h3>Polyline encoding</h3>
+                <p>Polylines providing the route are encoded to save bandwidth and storage. These can be decompressed using the <a href="https://developers.google.com/maps/documentation/utilities/polylinealgorithm">Polyline encoding</a> page to manually decode it yourself. Others have already created decoders in <a href="https://gist.github.com/serialc/3a8ab85df9eb0cec7177f2b4bd13a1cd">R</a>, <a href="https://github.com/mapbox/polyline/blob/master/src/polyline.js">JavaScript</a>, <a href="http://jeffreysambells.com/2010/05/27/decoding-polylines-from-google-maps-direction-api-with-java">Java</a> and <a href="https://gist.github.com/signed0/2031157">Python</a>.
+                <h3>Live requests</h3>
+                <p>It is possible to request 'live' traffic. This requires making queries at a somewhat precise time. As we are bound by not making too many requests concurrently it is possible that requests slip a few minutes or, more worrying, will not get executed as the daily quota will be exceeded by the time the live requests are attempted.</p>
+                <p>Similarly to short term live requests, if daily live requests exceed 2,500, paying will be necessary.</p>
+                <h3>Latitude and Longitude inputs</h3>
+                <p>Inputs of origin and destination are only possible by lat/long currently. Adding addresses would require a few modifications (notably see below).</p>
+                <h3>Region biasing</h3>
+                <p>If requests wish to be used with addresses rather than lat/long, region biasing will need to be added to ABR. This currently isn't.</p>
+            </div>
+        </div>
+    </div>
+    <div id="footer" class="container">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 text-right">
+                <p><strong>ABR</strong></p>
+                <p>© 2018</p>
+            </div>
+            <div class="col-sm-3 col-md-4">
+                <p><strong>Created by</strong></p>
+                <p>University of Hull and<br>University of Luxembourg</p>
+            </div>
+            <div class="col-sm-6 col-md-6">
+                <p><strong>Resources</strong></p>
+                <p>
+                    <a href='https://developers.google.com/maps/documentation/directions/intro'>Google Directions API</a><br>
+                    <a href="https://console.developers.google.com">Google Developer Console</a><br>
+                    <a href='https://getbootstrap.com/docs/4.0/layout/overview/'>Bootstrap 4.0</a><br>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal -->
+    <div id="main_modal" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Modal title</h4>
+                    <button type="button" class="close right" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body"> </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger">Delete</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- Optional JavaScript -->
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+    <script defer src="js/leaflet.js"></script>
+    <script src="js/abr.js"></script>
+  </body>
+</html>
