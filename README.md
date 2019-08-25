@@ -6,3 +6,11 @@ It's recommended you do not run this publicly as submitted Google API keys can b
 
 1. Create DB tables.
 2. Configure php/constants.php file.
+3. Configure CRON to perform tasks:  
+\# Process requests  
+&ast; &ast; &ast; &ast; &ast; /usr/local/bin/php ~/www/abr/php/main.php  
+\# Request zipping of bundle of queries  
+&ast; &ast; &ast; &ast; &ast; /usr/local/bin/php ~/www/abr/php/zip_case_study.php  
+\# Log disc usage
+10,40 &ast; &ast; &ast; &ast; /usr/local/bin/php ~/www/abr/php/analytics_data_collector.php
+
