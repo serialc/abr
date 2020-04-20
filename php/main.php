@@ -6,7 +6,6 @@
 # 3. stores result,
 # 4. updates database
 
-include('constants_SJQLaSKateyNhmy9zAZhbG.php');
 include('abrlib.php');
 
 class main {
@@ -135,8 +134,8 @@ class main {
                 $save_dir = RESULTS_FILE_HOLDER . '/' . $r['case_study'];
                 if( file_exists($save_dir) === false ) {
                     if( mkdir($save_dir) === false ) {
-                        $this->abr->append_log("DIRECTORY ERROR: Retrieved data for request case study <strong>" . $r['case_study'] . " " . $r['id'] . " " . $r['idsuffix'] . "</strong> but couldn't create the directory to save the file. Don't worry we'll try again.");
-                        continue;
+                        $this->abr->append_log("DIRECTORY ERROR: Retrieved data for request case study <strong>" . $r['case_study'] . " " . $r['id'] . " " . $r['idsuffix'] . "</strong> but couldn't create the directory to save the file.");
+                        break;
                     }
                 }
 
@@ -160,8 +159,8 @@ class main {
                 if( $written === FALSE ) {
                     # this is bad - got the data but unable to save it!
                     # Log this, don't update mysql and continue to next request (with probably the same result)
-                    $this->abr->append_log("SAVING ERROR: Retrieved data for request case study <strong>" . $r['case_study'] . " " . $r['id'] . " " . $r['idsuffix'] . "</strong> but didn't manage to save the data. Don't worry we'll try again.");
-                    continue;
+                    $this->abr->append_log("SAVING ERROR: Retrieved data for request case study <strong>" . $r['case_study'] . " " . $r['id'] . " " . $r['idsuffix'] . "</strong> but didn't manage to save the data.");
+                    break;
                 }
                 
                 # mysql update
@@ -180,7 +179,7 @@ class main {
                 }
                 # mysql update
                 $this->abr->update_error_request($r, $status);
-                continue;
+                break;
             case "OVER_QUERY_LIMIT":
                 # this shouldn't happen!
                 # log it and continue to next request - do not update as finished/failed. 
@@ -193,7 +192,7 @@ class main {
                 $this->abr->block_apikey( $r['apikey'], 'temporary');
                 $this->abr->append_log('Apikey ending with ' . substr($r['apikey'], -6) . ' has been <b>temporarily blocked</b> due to exceeding Google API quota.');
 
-                continue;
+                break;
             case "REQUEST_DENIED":
             case "UNKNOWN_ERROR":
                 # log it, mark this request as failed/finished and continue to next request
@@ -202,7 +201,7 @@ class main {
                     $this->abr->append_log("Error detail: " . $results_json['error_message']);
                 }
                 $this->abr->update_error_request($r, $status);
-                continue;
+                break;
             default:
                 # shouldn't happen so log it
                 $this->abr->append_log($status . " error for request case study <strong>" . $r['case_study'] . " " . $r['id'] . " " . $r['idsuffix'] . "</strong>");
@@ -210,7 +209,7 @@ class main {
                 if( isset($results_json['error_message']) ) {
                     $this->abr->append_log("Error detail: " . $results_json['error_message']);
                 }
-                continue;
+                break;
             }
 
             # count the request

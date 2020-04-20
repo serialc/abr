@@ -204,7 +204,19 @@ ABR.onload = function() {
     // Results refresh button 
     document.getElementById('refresh_results_table_button').addEventListener('click', function() { ABR.load_results_table(); }); 
 
-    // Results refresh button 
+    // Clear analytics
+    document.getElementById('abr_analytics_clear_button').addEventListener('click', function() {
+        $.ajax({
+            url: "php/status.php",
+            type: "POST",
+            data: {"cmd": "clear_analytics"},
+            cache: false
+        })
+        .done(function(msg) { ABR.update_requests_analytics_graph(60); })
+        .fail(function(msg) { console.log(msg); });
+    });
+
+    // Refresh analytics
     document.getElementById('refresh_analytics_button').addEventListener('click', function() {
         ABR.update_requests_analytics_graph(4320);
     }); 

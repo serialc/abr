@@ -25,6 +25,9 @@ switch($cmd) {
     case "clear_log":
         print($abr->response($abr->clear_log()));
         break;
+    case "clear_analytics":
+        print($abr->response($abr->clear_analytics()));
+        break;
     default:
         print($abr->response("BAD REQUEST: You asked for something but I don't understand/expect.", 400)) and die();
 }

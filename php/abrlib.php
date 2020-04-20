@@ -324,18 +324,48 @@ class abrlib {
 
     # Handles the log file
     public function append_log($msg) {
-        $fh = fopen(ABR_LOG_FILE, "a") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
-        $date = new DateTime;
-        $date = $date->format('Y-m-d H:i:s');
-        fwrite($fh, '[' . $date . '] ' . $msg . "\n");
-        fclose($fh);
+        if( is_writable(ABR_LOG_FILE) ) {
+            $fh = fopen(ABR_LOG_FILE, "a") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
+            $date = new DateTime;
+            $date = $date->format('Y-m-d H:i:s');
+            fwrite($fh, '[' . $date . '] ' . $msg . "\n");
+            fclose($fh);
+        } else {
+            print($abr->response("SERVER ERROR: Unable to write to file.", 500)) and die();
+        }
     }
 
     public function clear_log() {
-        $fh = fopen(ABR_LOG_FILE, "w") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
-        # write empty string to clear the file
-        fwrite($fh, ''); 
-        fclose($fh);
+        if( is_writable(ABR_LOG_FILE) ) {
+            $fh = fopen(ABR_LOG_FILE, "w") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
+            # write empty string to clear the file
+            fwrite($fh, ''); 
+            fclose($fh);
+            return True;
+        } else {
+            print($abr->response("SERVER ERROR: Unable to write to file.", 500)) and die();
+        }
+    }
+
+    public function clear_analytics() {
+        if( is_writable(ABR_REQUESTS_COUNT_LOG_FILE) ) {
+            $fh = fopen(ABR_REQUESTS_COUNT_LOG_FILE, "w") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
+            # write empty string to clear the file
+            fwrite($fh, ''); 
+            fclose($fh);
+        } else {
+            print($this->response("PERMISSION DENIED: Unable to write to file.", 500)) and die();
+        }
+
+        if( is_writable(ABR_DISK_USAGE_LOG_FILE) ) {
+            $fh2 = fopen(ABR_DISK_USAGE_LOG_FILE, "w") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
+            # write empty string to clear the file
+            fwrite($fh2, ''); 
+            fclose($fh2);
+        } else {
+            print($this->response("SERVER ERROR: Unable to write to file.", 500)) and die();
+        }
+
         return True;
     }
 

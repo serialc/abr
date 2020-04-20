@@ -2,9 +2,9 @@
 
 # DB connection parameters
 define('DB_SERVER', 'localhost');
-define('DB_USER', 'test');                      # customize
-define('DB_PASS', 'super_secret_db_passwd');    # customize 
-define('DB_NAME', 'abr_project_db');            # customize
+define('DB_USER', 'username');          # customize
+define('DB_PASS', 'super_secret_pw');   # customize 
+define('DB_NAME', 'abr_db_name');            # customize
 
 # DB Table names
 define('TABLE_REQUESTS', 'requests');
@@ -14,10 +14,11 @@ define('TABLE_STATE', 'process');
 define('TABLE_UPLOADING', 'upload_processing');
 
 # paths to files/folders
-define("ABR_PATH", "/Users/cyrille/Sites/AdvancedBatchRouting/abr/php");        # customize
+define("ABR_PATH", "/home/username/public_html/abr/");        # customize
 define("TEMP_FILE_HOLDER", ABR_PATH . "upload_temp");
 define("RESULTS_FILE_HOLDER", ABR_PATH . "results");
 define("ZIP_DIRECTORY", ABR_PATH . "zip");
+
 define("LOG_FILE_PATH", ABR_PATH . "log_files/");
 define("ABR_LOG_FILE", LOG_FILE_PATH . "abr_log_file.txt");
 define("ABR_REQUESTS_COUNT_LOG_FILE", LOG_FILE_PATH . "abr_requests_count_log_file.txt");
