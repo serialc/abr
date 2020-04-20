@@ -93,7 +93,7 @@ table tbody tr:nth-child(2n-1) {
     margin-bottom: 16px;
 }
 .routing {
-    background-image: url('http://frakturmedia.net/oswp/pathways/Paths.svg');
+    background-image: url('../images/Paths.svg');
 }
 .setting p:nth-child(2) {
     font-weight: bold;

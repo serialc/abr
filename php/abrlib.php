@@ -77,7 +77,7 @@ class abrlib {
         try {
             $this->conn = new mysqli(DB_SERVER, DB_USER, DB_PASS, DB_NAME);
         } catch (Exception $e) {
-            echo 'ERROR: Failed to connect to database. Please contact your administrator with the following message:<br>' . $e->getMessage();
+            echo 'ERROR: Failed to connect to database. Please contact your administrator.';
         }
 
         if( $this->conn->connect_error ) {

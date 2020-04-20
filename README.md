@@ -6,7 +6,10 @@ It's recommended you do not run this publicly as submitted Google API keys can b
 
 1. Create DB tables.
 2. Configure php/constants.php file.
-3. Configure CRON to perform tasks:  
+3. Have all the necessary interfaces for MySQL, PHP, and Apache to communicate.
+  * For example: libapache2-mod-php, php7.3-mysql
+  * Restart apache if necessary.
+4. Configure CRON to perform tasks:  
 \# Process requests  
 &ast; &ast; &ast; &ast; &ast; /usr/local/bin/php ~/www/abr/php/main.php  
 \# Request zipping of bundle of queries  
