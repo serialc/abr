@@ -1,2 +1,4 @@
-/php/constants.php
-/log_files
+php/constants.php
+log_files
+results
+upload_temp
