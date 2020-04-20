@@ -15,7 +15,7 @@ CREATE TABLE requests (
     live TINYINT(1) DEFAULT 0,
     origin varchar(24) NOT NULL,
     destination varchar(24) NOT NULL,
-    departure_datetime INT UNSIGNED NOT NULL,
+    departure_datetime INT UNSIGNED DEFAULT NULL,
     mode ENUM('driving', 'walking', 'bicycling', 'transit') NOT NULL,
     priority TINYINT(1) UNSIGNED NOT NULL,
     apikey varchar(39) NOT NULL,

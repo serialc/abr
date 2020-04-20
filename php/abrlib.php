@@ -226,6 +226,11 @@ class abrlib {
                 $requests[0] = $p;
                 $requests[0]['idsuffix'] = '';
                 $requests[0]['live'] = 0; // boolean true/false
+                
+                # departure_datetime can be blank, or an integer. If it's blank, convert to NULL
+                if( strcmp($p['departure_datetime'], '') === 0) {
+                    $requests[0]['departure_datetime'] = 'NULL';
+                }
 
                 # Live request
                 if( preg_match('/L/', $p['instructions']) ) {
@@ -274,6 +279,7 @@ class abrlib {
                     $requests = $new_requests;
                 }
 
+
                 # Insert the requests for this line
                 # validating is done in upload code - no escape characters are present
                 # build super insert
@@ -288,8 +294,8 @@ class abrlib {
                         $req['idsuffix'] . "', " . 
                         $req['live'] . ", '" . 
                         $req['origin'] . "', '" . 
-                        $req['destination'] . "', '" .
-                        $req['departure_datetime'] . "', '" .
+                        $req['destination'] . "', " .
+                        $req['departure_datetime'] . ", '" .
                         $req['mode'] . "', " .
                         $req['priority'] . ", '" .
                         $req['apikey'] . "'), ";
@@ -305,7 +311,7 @@ class abrlib {
                 if( ! $qr ) {
                     # for debugging - turn off
                     #print("DEBUGGING - Must be removed eventually.");
-                    #print $bssid . " INSERT query failed: " . $this->conn->error . "\n";
+                    #print "INSERT query failed: " . $this->conn->error . "\n";
                     #print $insert_q;
 
                     print($this->response(["DB ERROR: Unable to add data from line '" . $lines . "' to requests database. Quitting. Requests up to this line have been added."], 500)) and die();
@@ -373,21 +379,21 @@ class abrlib {
 
         $this->_db_connect();
 
-        # get a batch of queries that are
+        # get a batch of queries that are:
+        # - have not run yet (rundate is NULL)
         # - sorted by those with highest priority first
-        # - are under their quota for the last 25 hours
+        # - are under their quota for the last 25 hours (except if requests are 'high' priority)
         # - are the closest to the present
-        # - are not run yet
-        # - are not block apikeys
+        # - are not blocked apikeys
         if( strcmp($type, "regular") === 0 ) {
 
             $q = "SELECT * FROM " . TABLE_REQUESTS . " WHERE rundate IS NULL " .
                 "AND apikey NOT IN (SELECT apikey FROM " . TABLE_APIKEY_BLOCK . ") " .
                 "AND (apikey NOT IN " .
                     "(SELECT apikey FROM " .
-                        "(SELECT apikey, count(apikey) AS count FROM " . TABLE_REQUESTS . " WHERE rundate > DATE_SUB(NOW(), INTERVAL 25 HOUR) GROUP BY apikey ORDER BY rundate) " .
+                        "(SELECT apikey, count(apikey) AS count FROM " . TABLE_REQUESTS . " WHERE rundate > DATE_SUB(NOW(), INTERVAL 25 HOUR) GROUP BY apikey) " .
                     "AS keycount WHERE count >= " . API_KEY_DAILY_REQUEST_QUOTA_LIMIT . ") " .
-                " OR priority > " . QUOTA_BYPASS_PRIORITY_LIMIT . ") ORDER BY priority DESC, departure_datetime DESC LIMIT " . $quantity;
+                    "OR priority > " . QUOTA_BYPASS_PRIORITY_LIMIT . ") ORDER BY priority DESC, departure_datetime DESC LIMIT " . $quantity;
 
         }
 
@@ -505,6 +511,27 @@ class abrlib {
         
         # check for error
         if( ! $qr ) { return false; }
+        return true;
+    }
+    public function zip_all_finished_case_studies () {
+        # Get the finished case studies
+        $this->_db_connect();
+
+        $q = 'SELECT case_study FROM (SELECT case_study, count(case_study) AS total, count(rundate) AS complete FROM ' . TABLE_REQUESTS . ' GROUP BY case_study) AS grp WHERE total = complete';
+        $qr = $this->conn->query($q);
+
+        # Check if it executed correctly
+        if( $qr === false ) {
+            print(mysqli_error($this->conn));
+            return false;
+        }
+
+        # add them to the queue
+        while( $row = $qr->fetch_array(MYSQLI_ASSOC) ) {
+            $this->add_case_study_zip_request($row['case_study']);
+        }
+
+        # send back 200
         return true;
     }
     public function delete_case_study_zip_request ( $case_study ) {

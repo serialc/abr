@@ -95,9 +95,9 @@ class main {
             $zpath = ZIP_DIRECTORY . '/' . $r['case_study'] . '.zip';
             if( file_exists($zpath) ) { unlink($zpath); }
 
-            # slight modification if departure_datetime === 0, means we don't want traffic
+            # slight modification, if departure_datetime is NULL, means we don't want traffic
             $traffic = true;
-            if( $r['departure_datetime'] === '0' ) {
+            if( $r['departure_datetime'] === NULL ) {
                 $traffic = false;
             }
 

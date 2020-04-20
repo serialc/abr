@@ -29,7 +29,7 @@ $upload_dir = TEMP_FILE_HOLDER . '/';
 if( is_dir($upload_dir) && is_writable($upload_dir) ) {
     move_uploaded_file($tmp_file_path, $upload_dir . $nfn);
 } else {
-    print($abr->response(["FILE ERROR: Unable to write file."], 500)) and die();
+    print($abr->response(["FILE ERROR: Unable to write file to " . TEMP_FILE_HOLDER], 500)) and die();
 }
 
 # count number of lines in the file

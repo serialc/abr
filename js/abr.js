@@ -204,6 +204,17 @@ ABR.onload = function() {
     // Results refresh button 
     document.getElementById('refresh_results_table_button').addEventListener('click', function() { ABR.load_results_table(); }); 
 
+    // Results, zip all finished case studies
+    document.getElementById('zip_finished_case_studies').addEventListener('click', function() {
+        $.ajax({
+            url: "php/download.php?instruction=zip_all_finished",
+            method: "GET",
+            cache: false
+        })
+        .done(function(data) { console.log(data); })
+        .fail(function(msg) { console.log(msg); });
+    });
+
     // Clear analytics
     document.getElementById('abr_analytics_clear_button').addEventListener('click', function() {
         $.ajax({

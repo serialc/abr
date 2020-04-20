@@ -168,10 +168,13 @@
             <div class="col-lg">
                 <h1>
                     Results
-                    <button id="refresh_results_table_button" class="btn btn-info float-right">Refresh</button>
+                    <div class="float-right">
+                        <button id="zip_finished_case_studies" class="btn btn-warning" title="Zip all completed case studies">Smart Zip</button> 
+                        <button id="refresh_results_table_button" class="btn btn-info">Refresh</button>
+                    </div>
                 </h1>
                 <p>Aside from monitoring progress you can also download the data for each case study.</p>
-                <p>Note that as data sets get larger, packaging them for download may take <em>a few minutes</em>. <strong>Please be patient</strong>.</p>
+                <p>Note that as data sets get larger, zipping/packaging them for download may take <em>a few minutes</em>. <strong>Please be patient</strong>.</p>
                 <div id="results_table" class="boxit"></div>
             </div>
         </div>
@@ -254,8 +257,8 @@ ca_kaml;2;50.676,-120.315;50.674,-120.327;1537833600;driving;HL;2;SECRET_API_KEY
                     <li>
                         <code>departure_datetime</code> - epoch time (seconds since January 1st, 1970 00:00:00 UTC) is required if traffic congestion is desired. Otherwise it can be left blank.
                         <pre>[integer]</pre>
-                        <p><strong>NOTE</strong>: You <em>must</em> convert your local time to the epoch time (also known as Unix time or POSIX time) or your requests will at the wrong time. The best way to do this is to first convert your local time to UTC time, then retrieve the epoch time.</p>
-                        <p>Tuesday September 25, 2018 02:00:00 (am) in Luembourg, is Tuesday the 25th of September 2018 at 00:00:00 UTC, which is 1537833600. See <a href="https://www.epochconverter.com/">EpochConverter</a> for more information.</p>
+                        <p><strong>NOTE</strong>: You <em>must</em> convert your local time to the epoch time (also known as Unix time or POSIX time) or your requests will run at the wrong time.</p>
+                        <p>Tuesday September 25, 2018 02:00:00 (am) in Luxembourg, is Tuesday the 25th of September 2018 at 00:00:00 UTC, which is 1537833600. See <a href="https://www.epochconverter.com/">EpochConverter</a> for more information.</p>
                     </li>
 
                     <li>
