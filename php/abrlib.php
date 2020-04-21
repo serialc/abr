@@ -381,14 +381,17 @@ class abrlib {
 
         # get a batch of queries that are:
         # - have not run yet (rundate is NULL)
+        # - are not live requests
         # - sorted by those with highest priority first
         # - are under their quota for the last 25 hours (except if requests are 'high' priority)
         # - are the closest to the present
         # - are not blocked apikeys
         if( strcmp($type, "regular") === 0 ) {
 
-            $q = "SELECT * FROM " . TABLE_REQUESTS . " WHERE rundate IS NULL " .
+            $q = "SELECT * FROM " . TABLE_REQUESTS .  " WHERE " .
+                "rundate IS NULL " .
                 "AND apikey NOT IN (SELECT apikey FROM " . TABLE_APIKEY_BLOCK . ") " .
+                "AND live = 0 " .
                 "AND (apikey NOT IN " .
                     "(SELECT apikey FROM " .
                         "(SELECT apikey, count(apikey) AS count FROM " . TABLE_REQUESTS . " WHERE rundate > DATE_SUB(NOW(), INTERVAL 25 HOUR) GROUP BY apikey) " .
