@@ -2,7 +2,7 @@
 # filename: abrlib.php
 # helper functions
 
-include('constants.php');
+include('constants_custom.php');
 
 class abrlib {
 
