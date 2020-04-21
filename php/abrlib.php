@@ -396,13 +396,13 @@ class abrlib {
                     "(SELECT apikey FROM " .
                         "(SELECT apikey, count(apikey) AS count FROM " . TABLE_REQUESTS . " WHERE rundate > DATE_SUB(NOW(), INTERVAL 25 HOUR) GROUP BY apikey) " .
                     "AS keycount WHERE count >= " . API_KEY_DAILY_REQUEST_QUOTA_LIMIT . ") " .
-                    "OR priority > " . QUOTA_BYPASS_PRIORITY_LIMIT . ") ORDER BY priority DESC, departure_datetime DESC LIMIT " . $quantity;
+                    "OR priority > " . QUOTA_BYPASS_PRIORITY_LIMIT . ") ORDER BY priority DESC, departure_datetime ASC LIMIT " . $quantity;
 
         }
 
         # Live requests are not bound by quota limit - it is up to the user to be careful and potentially get ERRORS or incur costs.
         if( strcmp($type, "live") === 0 ) {
-            $q = "SELECT * FROM " . TABLE_REQUESTS . " WHERE rundate IS NULL AND live = 1 AND departure_datetime < DATE_ADD(NOW(), INTERVAL 1 minute) ORDER BY departure_datetime DESC";
+            $q = "SELECT * FROM " . TABLE_REQUESTS . " WHERE rundate IS NULL AND live = 1 AND departure_datetime < UNIX_TIMESTAMP(NOW() + INTERVAL 1 minute) ORDER BY departure_datetime ASC";
         }
 
         # execute query and check for errors

@@ -23,7 +23,7 @@ foreach($abr->get_case_study_zip_requests() as $case_study) {
     $zip_file_path = ZIP_DIRECTORY . '/' . $internal_zip_file_name;
 
     # check if zip file already exists - zip files are automatically deleted if data source is updated
-    if( file_exists($sip_file_path) ) {
+    if( file_exists($zip_file_path) ) {
         continue;
     }
     
