@@ -1,4 +1,4 @@
-php/constants*
+php/constants_custom.php
 log_files
 results
 upload_temp
