@@ -5,6 +5,9 @@
 include('abrlib.php');
 $abr = new abrlib();
 
+# log start time, want to stop in 55 seconds
+$start_time = time();
+
 # Get case studies from DB (NOTE - this only gets 1 case study)
 foreach($abr->get_case_study_zip_requests() as $case_study) {
     # testing
@@ -63,4 +66,8 @@ foreach($abr->get_case_study_zip_requests() as $case_study) {
 
     # try deleting this case_study from the queue again in case someone was impatient
     $abr->delete_case_study_zip_request( $case_study );
+
+    if( $start_time + RUNNING_TIME_PER_MINUTE < time() ) {
+        break;
+    }
 }
