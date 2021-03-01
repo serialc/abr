@@ -6,6 +6,9 @@ It's recommended you do not run this publicly as submitted Google API keys can b
 
 1. Create DB tables (see sql).
 2. Configure php/constants.php file and rename as php/constants\_custom.php
+  * You will need to define DB config.
+  * Update the main path of the applicatioin.
+  * Customize the directories to store various data - also create the directories.
 3. Have all the necessary interfaces for MySQL, PHP, and Apache to communicate and operate.
   * For example: libapache2-mod-php, php7.3-mysql, php-zip, php-curl
   * Restart apache if necessary.
