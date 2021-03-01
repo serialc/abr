@@ -1,5 +1,7 @@
 php/constants_custom.php
 log_files
-results
+results*
 upload_temp
-zip
+zip*
+.htaccess
+.htpasswd

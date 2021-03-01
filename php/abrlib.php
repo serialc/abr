@@ -77,12 +77,12 @@ class abrlib {
         try {
             $this->conn = new mysqli(DB_SERVER, DB_USER, DB_PASS, DB_NAME);
         } catch (Exception $e) {
-            echo 'ERROR: Failed to connect to database. Please contact your administrator.';
+            print($this->response(["DB ERROR: Unable to connect to DB."], 500)) and die();
+            #die('CONNECTION ERROR: (' . mysqli_connect_errno() . ') ' . mysqli_connect_error());
         }
 
         if( $this->conn->connect_error ) {
             print($this->response(["DB ERROR: Unable to connect to DB."], 500)) and die();
-            #die('CONNECTION ERROR: (' . mysqli_connect_errno() . ') ' . mysqli_connect_error());
         }
         
         # Greatly simplify life of funky characters
@@ -331,11 +331,9 @@ class abrlib {
     # Handles the log file
     public function append_log($msg) {
         if( is_writable(ABR_LOG_FILE) ) {
-            $fh = fopen(ABR_LOG_FILE, "a") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
-            $date = new DateTime;
-            $date = $date->format('Y-m-d H:i:s');
-            fwrite($fh, '[' . $date . '] ' . $msg . "\n");
-            fclose($fh);
+            $dateob = new DateTime;
+            $date = $dateob->format('Y-m-d H:i:s');
+            file_put_contents(ABR_LOG_FILE, '[' . $date . '] ' . $msg . "\n", FILE_APPEND) or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
         } else {
             print($abr->response("SERVER ERROR: Unable to write to file.", 500)) and die();
         }
@@ -343,10 +341,10 @@ class abrlib {
 
     public function clear_log() {
         if( is_writable(ABR_LOG_FILE) ) {
-            $fh = fopen(ABR_LOG_FILE, "w") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
+            $dateob = new DateTime;
+            $date = $dateob->format('Y-m-d H:i:s');
             # write empty string to clear the file
-            fwrite($fh, ''); 
-            fclose($fh);
+            file_put_contents(ABR_LOG_FILE, "[" . $date . "] Contents cleared\n") or $this->response("SERVER ERROR: Failed to open log file.", 500) and die();
             return True;
         } else {
             print($abr->response("SERVER ERROR: Unable to write to file.", 500)) and die();
@@ -376,6 +374,10 @@ class abrlib {
     }
 
     public function get_requests_batch($type, $quantity) {
+
+        if( !is_null($quantity) AND $quantity <= 0 ) {
+          return [];
+        }
 
         $this->_db_connect();
 
