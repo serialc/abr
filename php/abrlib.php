@@ -498,8 +498,7 @@ class abrlib {
     public function get_case_study_zip_requests () {
         $this->_db_connect();
 
-        # we limit this to one in case it takes too long to process and there are multiple, this could cause multiple calls
-        $q = 'SELECT case_study FROM ' . TABLE_ZIP_QUEUE . ' LIMIT 1';
+        $q = 'SELECT case_study FROM ' . TABLE_ZIP_QUEUE . ' ';
         $qr = $this->conn->query($q) or die(mysqli_error($this->conn));
 
         $rows = [];
