@@ -260,7 +260,7 @@ ABR.load_results_table = function() {
         cache: false
     })
     .done(function(data) {
-        html = "<table><thead><tr><th>Case study</th><th>Status</th><th class='text-center'>Success</th><th class='text-center'>Errors</th><th class='text-center'>Queued</th><th class='text-center'>Processed / Total</th><th>Zip / DL</th></tr></thead><tbody>";
+        html = "<table><thead><tr><th>Case study</th><th>Status</th><th class='text-center'>Success</th><th class='text-center'>Errors</th><th class='text-center'>Queued</th><th class='text-center'>Processed / Total</th><th>Zip / DL</th><th>Select</th></tr></thead><tbody>";
         for( i in data ) {
             i = data[i];
             html += "<tr><td>" + i["case_study"] + "</td>" +
@@ -277,6 +277,7 @@ ABR.load_results_table = function() {
                     (i["zip_state"] ?  "<a href='php/download.php?instruction=download&case_study=" + i["case_study"] + "' title='" + i["case_study"] + " zip created on:&#013;" + i["zip_mod"] + "&#013;Size: " + (i["zip_size"]/1024/1024).toFixed(1) + " MB'><i class='fas fa-download'></i></a>" : "<a style='color: grey'><i class='fas fa-download'></i></a>") +
                 "<a href='#' onclick='ABR.delete_case_study(event, \"" + i['case_study'] + "\")' title='Delete all data for case study " + i['case_study'] + "' style='color: red'><i class='fas fa-times-circle'></a>" +
                 "</td>" +
+                "<td class='text-center'><input type='checkbox'></td>" +
                 "</tr>";
         }
         html += '</tbody></table>';

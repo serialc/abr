@@ -10,9 +10,8 @@ body > .container {
 
 #footer {
     background-color: #eee;
-    min-height: 300px;
+    padding: 2rem;
     padding-top: 2rem;
-    margin-bottom: 30px;
 }
 
 /* Formatting tags */

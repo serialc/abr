@@ -4,13 +4,13 @@ Advanced batch routing - a more comprehensive tool than [FBR](https://github.com
 ## Installation
 It's recommended you do not run this publicly as submitted Google API keys can be exposed.
 
-1. Create DB tables (see sql).
+1. Create the DB and tables (see sql).
 2. Configure php/constants.php file and rename as php/constants\_custom.php
   * You will need to define DB config.
   * Update the main path of the applicatioin.
   * Customize the directories to store various data - also create the directories.
 3. Have all the necessary interfaces for MySQL, PHP, and Apache to communicate and operate.
-  * For example: libapache2-mod-php, php7.3-mysql, php-zip, php-curl
+  * For example: libapache2-mod-php, php7.4-mysql, php-zip, php-curl, php7.4-curl
   * Restart apache if necessary.
 4. Configure CRON to perform tasks:  
 \# Process requests  
