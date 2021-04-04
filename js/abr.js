@@ -505,11 +505,13 @@ ABR.delete_multiple_case_studies = function(e) {
 
     // determine what rows are selected
     let csdr = ABR.data.results;
-    sellist = []
+    let sellist = []
     for( let i in csdr) {
-      if( document.getElementById('select_' + cs['case_study']).checked ) {
-        sellist.push(cs['case_study']);
-      }
+        cs = csdr[i];
+
+        if( document.getElementById('select_' + cs['case_study']).checked ) {
+            sellist.push(cs['case_study']);
+        }
     }
 
     $('.modal-title', '#main_modal').html("Delete multiple rows");
@@ -550,7 +552,7 @@ ABR.delete_multiple_case_studies = function(e) {
 ABR.download_multiple_case_studies = function() {
     // determine what rows are selected
     let csdr = ABR.data.results;
-    sellist = []
+    let sellist = []
     for( let i in csdr) {
       i = csdr[i]
       if( document.getElementById('select_' + i['case_study']).checked ) {
