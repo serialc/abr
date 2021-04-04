@@ -170,13 +170,21 @@
                 <h1>
                     Results
                     <div class="float-right">
-                        <button id="zip_finished_case_studies" class="btn btn-warning" title="Zip all completed case studies">Smart Zip</button> 
                         <button id="refresh_results_table_button" class="btn btn-info">Refresh</button>
                     </div>
                 </h1>
                 <p>Aside from monitoring progress you can also download the data for each case study.</p>
                 <p>Note that as data sets get larger, zipping/packaging them for download may take <em>a few minutes</em>. <strong>Please be patient</strong>.</p>
-                <div id="results_table" class="boxit"></div>
+                <div class="boxit" style="text-align:right">
+                  <div style="text-align:right">
+                    <button id="zip_finished_case_studies" class="btn btn-warning" title="Zip all completed case studies">Smart Zip <i class='fas fa-bolt'></i></button> 
+                    <button id="select_finished_case_studies" class="btn btn-warning" title="Select all completed case studies">Smart select</button> 
+                    Selected:
+                    <button id="delete_selected_case_studies" class="btn btn-danger" title="Delete selected case studies">Delete</button> 
+                    <button id="download_selected_case_studies" class="btn btn-success" title="Download selected case studies">Download</button> 
+                  </div>
+                  <div id="results_table"></div>
+                </div>
             </div>
         </div>
     </div>

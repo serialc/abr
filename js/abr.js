@@ -215,6 +215,11 @@ ABR.onload = function() {
         .fail(function(msg) { console.log(msg); });
     });
 
+    document.getElementById('select_finished_case_studies').addEventListener('click', function() { ABR.select_finished_results_rows(); });
+    document.getElementById('delete_selected_case_studies').addEventListener('click', function() { ABR.delete_multiple_case_studies(); });
+    document.getElementById('download_selected_case_studies').addEventListener('click', function() { ABR.download_multiple_case_studies(); });
+
+
     // Clear analytics
     document.getElementById('abr_analytics_clear_button').addEventListener('click', function() {
         $.ajax({
@@ -241,7 +246,10 @@ ABR.onload = function() {
             ABR.update_server_settings();
             ABR.load_disk_usage();
         }
-        if( ABR.active === "results" || ABR.just_arrived ) {
+        if( //ABR.active === "results" || 
+          ABR.just_arrived ) {
+            // commented out above, no longer refreshes.
+            // allowing calmer selection of rows and manual refresh of results only.
             ABR.load_results_table();
         }
         ABR.just_arrived = false;
@@ -260,10 +268,16 @@ ABR.load_results_table = function() {
         cache: false
     })
     .done(function(data) {
+        // save this for now so we can select
+        if( !ABR[data] ) { ABR[data] = {} };
+        ABR.data.results = data;
+
         html = "<table><thead><tr><th>Case study</th><th>Status</th><th class='text-center'>Success</th><th class='text-center'>Errors</th><th class='text-center'>Queued</th><th class='text-center'>Processed / Total</th><th>Zip / DL</th><th>Select</th></tr></thead><tbody>";
         for( i in data ) {
             i = data[i];
-            html += "<tr><td>" + i["case_study"] + "</td>" +
+            csid = i['case_study'];
+
+            html += "<tr><td>" + csid + "</td>" +
                 "<td width=200><div title='Successfully retrieved' style='width:" + ((i["complete"]-i["errors"])/i["total"]*100) +
                 "%' class='spark_complete'></div><div title='Errors' style='width:" + (i["errors"]/i["total"]*100) +
                 "%' class='spark_errors'></div><div title='In queue' style='width:" + (i["queued"]/i["total"]*100) +
@@ -273,11 +287,11 @@ ABR.load_results_table = function() {
                 "<td class='text-center'>" + i["queued"] + "</td>" +
                 "<td class='text-center'>" + i["complete"] + ' / ' + i["total"] + " (" + Math.floor(i["complete"] / i["total"] * 100) + "%)</td>" +
                 "<td class=''>" +
-                    "<a href='#' onclick='ABR.zip_case_study_results(event, \"" + i["case_study"] + "\")' title='Generate zip file' style='color: orange'><i class='fas fa-bolt'></i></a> " +
-                    (i["zip_state"] ?  "<a href='php/download.php?instruction=download&case_study=" + i["case_study"] + "' title='" + i["case_study"] + " zip created on:&#013;" + i["zip_mod"] + "&#013;Size: " + (i["zip_size"]/1024/1024).toFixed(1) + " MB'><i class='fas fa-download'></i></a>" : "<a style='color: grey'><i class='fas fa-download'></i></a>") +
-                "<a href='#' onclick='ABR.delete_case_study(event, \"" + i['case_study'] + "\")' title='Delete all data for case study " + i['case_study'] + "' style='color: red'><i class='fas fa-times-circle'></a>" +
+                    "<a href='#' onclick='ABR.zip_case_study_results(event, \"" + csid + "\")' title='Generate zip file' style='color: orange'><i class='fas fa-bolt'></i></a> " +
+                    (i["zip_state"] ?  "<a href='php/download.php?instruction=download&case_study=" + csid + "' title='" + csid + " zip created on:&#013;" + i["zip_mod"] + "&#013;Size: " + (i["zip_size"]/1024/1024).toFixed(1) + " MB'><i class='fas fa-download'></i></a>" : "<a style='color: grey'><i class='fas fa-download'></i></a>") +
+                "<a href='#' onclick='ABR.delete_case_study(event, \"" + csid + "\")' title='Delete all data for case study " + csid + "' style='color: red'><i class='fas fa-times-circle'></a>" +
                 "</td>" +
-                "<td class='text-center'><input type='checkbox'></td>" +
+                "<td class='text-center'><input id='select_" + csid + "' type='checkbox'></td>" +
                 "</tr>";
         }
         html += '</tbody></table>';
@@ -287,6 +301,16 @@ ABR.load_results_table = function() {
         // can't get results
         console.log(msg);
     });
+};
+
+ABR.select_finished_results_rows = function() {
+  let csdr = ABR.data.results;
+  for( let i in csdr) {
+    cs = csdr[i];
+    if( cs['complete'] === cs['total'] ) {
+      document.getElementById('select_' + cs['case_study']).checked = true
+    }
+  }
 };
 
 ABR.zip_case_study_results = function(e, case_study) {
@@ -473,7 +497,82 @@ ABR.delete_case_study = function(e, case_study) {
     
     // Show the modal
     $('#main_modal').modal('toggle');
-}
+};
+
+ABR.delete_multiple_case_studies = function(e) {
+    // cancel the default action
+    //e.preventDefault();
+
+    // determine what rows are selected
+    let csdr = ABR.data.results;
+    sellist = []
+    for( let i in csdr) {
+      if( document.getElementById('select_' + cs['case_study']).checked ) {
+        sellist.push(cs['case_study']);
+      }
+    }
+
+    $('.modal-title', '#main_modal').html("Delete multiple rows");
+    $('.modal-body', '#main_modal').html(
+        "<p>Are you sure you wish to delete ALL the <strong>requests, data and zip files</strong> for the following case studies:</p>" +
+        "<p><strong>" + sellist.join('<br>') + "</strong></p>"
+        );
+
+    // After the modal appears, do the following...
+    $('#main_modal').on('shown.bs.modal', function () {
+        // nothing for now
+    });
+
+    // on submit handler
+    $('.btn-danger', '#main_modal').html('Submit').click(function() {
+        $.ajax({
+            type: "POST",
+            url: "php/delete_requests.php",
+            data: {"case_study": sellist, "instruction": "delete_multiple_full"}
+        })
+        .done(function() {
+            // hide the modal
+            $('#main_modal').modal('toggle');
+            // disable click handler that we just defined (and used)
+            $('.btn-danger', '#main_modal').html('Submit').off('click');
+            // reload the page
+            ABR.load_results_table();
+        })
+        .fail(function(e) {
+            console.log(e);
+        });
+    });
+    
+    // Show the modal
+    $('#main_modal').modal('toggle');
+};
+
+ABR.download_multiple_case_studies = function() {
+    // determine what rows are selected
+    let csdr = ABR.data.results;
+    sellist = []
+    for( let i in csdr) {
+      i = csdr[i]
+      if( document.getElementById('select_' + i['case_study']).checked ) {
+        if( i['zip_state'] ) {
+          sellist.push(i['case_study']);
+        } else {
+          // one selected row/case_study is not zipped yet!
+          // Either:
+          // - Wait for the row to be completed, or
+          // - Request for the completed records to be zipped, refresh the list and try again.
+          alert("A selected row/case_study is not ready for download!\n\nEither:\n- Wait for the row to completed processing, and then\n- Request for the completed record(s) to be zipped (Smart Zip), then refresh the list, and try again.");
+        }
+      }
+    }
+    if( sellist.length === 0 ) {
+      return;
+    }
+
+    // call url that will prompt download
+    window.location = "php/download.php?case_studies=" + JSON.stringify(sellist) + "&instruction=download_selection";
+};
+
 ABR.delete_pending_requests = function(case_study) {
     $('.modal-title', '#main_modal').html(case_study);
     $('.modal-body', '#main_modal').html(
@@ -651,14 +750,6 @@ ABR.load_status_page = function() {
     ABR.active = "status";
     el = document.getElementById(ABR.active + '_page');
     el.classList.remove('hidden');
-
-    // DISABLED as it is now automatically loaded and refreshed
-    // display ABR processing state and appropriate buttons
-    //ABR.update_processing_status(); 
-    // display summary of ABR queue
-    //ABR.update_queue_summary();
-    // display the log file
-    //ABR.load_log_file();
 };
 
 ABR.load_results_page = function() {
