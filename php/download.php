@@ -89,7 +89,7 @@ case 'download_selection':
 
     // send the package
     header('Content-Type: application/zip');
-    header('Content-disposition: attachment; filename=' . $zippath);
+    header('Content-disposition: attachment; filename=' . $zipname);
     header('Content-Length: ' . filesize($zippath));
     readfile($zippath);
 
