@@ -228,13 +228,17 @@ ABR.onload = function() {
             data: {"cmd": "clear_analytics"},
             cache: false
         })
-        .done(function(msg) { ABR.update_requests_analytics_graph(60); })
+        .done(function(msg) {
+          ABR.update_requests_analytics_graph(60);
+          ABR.update_disk_usage_analytics_graph(60);
+        })
         .fail(function(msg) { console.log(msg); });
     });
 
     // Refresh analytics
     document.getElementById('refresh_analytics_button').addEventListener('click', function() {
         ABR.update_requests_analytics_graph(4320);
+        ABR.update_disk_usage_analytics_graph(4320);
     }); 
 
     // continually update the status of ABR every minute
