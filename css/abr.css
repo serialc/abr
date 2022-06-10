@@ -6,6 +6,7 @@ body {
 
 body > .container {
     background-color: white;
+    padding-bottom: 4rem;
 }
 
 #footer {
